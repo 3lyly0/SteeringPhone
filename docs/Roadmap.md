@@ -9,15 +9,15 @@ Make SteeringPhone the **best free, open-source phone-as-controller solution** f
 ## Release Milestones
 
 ### v0.1.0 — Foundation (Phase 1–2)
-**Status:** In Progress
+**Status:** Completed
 
 - [x] Project architecture & folder structure
 - [x] Documentation suite
 - [x] Binary protocol specification
-- [ ] Protocol serializer / deserializer (Android)
-- [ ] Protocol deserializer (Windows)
-- [ ] CRC validation
-- [ ] Protocol unit tests
+- [x] Protocol serializer / deserializer (Android)
+- [x] Protocol deserializer (Windows)
+- [x] CRC validation
+- [x] Protocol unit tests
 
 ---
 
