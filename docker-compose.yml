@@ -1,0 +1,15 @@
+version: '3.8'
+
+services:
+  dev-tools:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    container_name: steeringphone-dev-tools
+    volumes:
+      - ./:/app
+    ports:
+      - "45678:45678/udp" # UDP Discovery port for local simulation
+      - "45679:45679/tcp" # WebSocket port for local simulation
+      - "45680:45680/udp" # UDP Data port for local simulation
+    restart: unless-stopped

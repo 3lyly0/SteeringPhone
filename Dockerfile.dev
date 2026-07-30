@@ -1,0 +1,13 @@
+# Development & Testing tools Dockerfile
+FROM alpine:3.19
+
+RUN apk add --no-cache \
+    sqlite \
+    bash \
+    curl \
+    netcat-openbsd \
+    bind-tools
+
+WORKDIR /app
+
+CMD ["tail", "-f", "/dev/null"]
