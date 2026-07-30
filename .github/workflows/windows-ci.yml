@@ -26,15 +26,15 @@ jobs:
           dotnet-version: '9.0.x'
 
       - name: Restore NuGet packages
-        run: dotnet restore -r win-x64
+        run: dotnet restore
         working-directory: apps/windows
 
       - name: Build solution
-        run: dotnet build --configuration Release -r win-x64 --no-restore
+        run: dotnet build --configuration Release --no-restore
         working-directory: apps/windows
 
       - name: Run unit tests
-        run: dotnet test --configuration Release -r win-x64 --no-build --verbosity normal
+        run: dotnet test --configuration Release --no-build --verbosity normal
         working-directory: apps/windows
 
       - name: Check code formatting
