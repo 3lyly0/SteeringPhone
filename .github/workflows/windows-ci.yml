@@ -1,0 +1,42 @@
+name: Windows CI
+
+on:
+  push:
+    branches: [ main, develop ]
+    paths:
+      - 'apps/windows/**'
+      - '.github/workflows/windows-ci.yml'
+  pull_request:
+    branches: [ main, develop ]
+    paths:
+      - 'apps/windows/**'
+
+jobs:
+  build:
+    name: Build & Test
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup .NET 9
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '9.0.x'
+
+      - name: Restore NuGet packages
+        run: dotnet restore
+        working-directory: apps/windows
+
+      - name: Build solution
+        run: dotnet build --configuration Release --no-restore
+        working-directory: apps/windows
+
+      - name: Run unit tests
+        run: dotnet test --configuration Release --no-build --verbosity normal
+        working-directory: apps/windows
+
+      - name: Check code formatting
+        run: dotnet format --verify-no-changes --verbosity diagnostic
+        working-directory: apps/windows
