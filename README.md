@@ -1,16 +1,16 @@
-# DriveLink
+# SteeringPhone
 
 **Transform your Android phone into a professional steering wheel controller for Windows games.**
 
-[![Android CI](https://github.com/your-org/drivelink/actions/workflows/android-ci.yml/badge.svg)](https://github.com/your-org/drivelink/actions)
-[![Windows CI](https://github.com/your-org/drivelink/actions/workflows/windows-ci.yml/badge.svg)](https://github.com/your-org/drivelink/actions)
+[![Android CI](https://github.com/3lyly0/SteeringPhone/actions/workflows/android-ci.yml/badge.svg)](https://github.com/3lyly0/SteeringPhone/actions)
+[![Windows CI](https://github.com/3lyly0/SteeringPhone/actions/workflows/windows-ci.yml/badge.svg)](https://github.com/3lyly0/SteeringPhone/actions)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
 ---
 
-## What is DriveLink?
+## What is SteeringPhone?
 
-DriveLink uses your Android phone's **accelerometer and gyroscope** as a real steering wheel. The companion Windows application receives sensor data and injects it into games via a **virtual Xbox 360 controller (ViGEmBus)** — compatible with every game that supports XInput, DirectInput, or Raw Input.
+SteeringPhone uses your Android phone's **accelerometer and gyroscope** as a real steering wheel. The companion Windows application receives sensor data and injects it into games via a **virtual Xbox 360 controller (ViGEmBus)** — compatible with every game that supports XInput, DirectInput, or Raw Input.
 
 No special hardware. No racing wheel required. Just your phone.
 
@@ -61,15 +61,15 @@ No special hardware. No racing wheel required. Just your phone.
 ### 1. Install ViGEmBus on Windows
 Download and install from [ViGEmBus Releases](https://github.com/ViGEm/ViGEmBus/releases).
 
-### 2. Install DriveLink Desktop
-Download the latest MSI from [Releases](https://github.com/your-org/drivelink/releases) and run it.
+### 2. Install SteeringPhone Desktop
+Download the latest MSI from [Releases](https://github.com/3lyly0/SteeringPhone/releases) and run it.
 
-### 3. Install DriveLink on your phone
-Install the APK from [Releases](https://github.com/your-org/drivelink/releases) or build from source.
+### 3. Install SteeringPhone on your phone
+Install the APK from [Releases](https://github.com/3lyly0/SteeringPhone/releases) or build from source.
 
 ### 4. Connect
-**USB:** Enable USB debugging on your phone, plug in, DriveLink auto-detects.  
-**WiFi:** Make sure both devices are on the same network. DriveLink auto-discovers via UDP broadcast.
+**USB:** Enable USB debugging on your phone, plug in, SteeringPhone auto-detects.  
+**WiFi:** Make sure both devices are on the same network. SteeringPhone auto-discovers via UDP broadcast.
 
 ### 5. Calibrate
 Run the Calibration Wizard on your phone. Hold the phone flat → rotate left → rotate right → save.
@@ -81,7 +81,7 @@ Select your game profile and start driving.
 
 ## Architecture
 
-DriveLink uses **Clean Architecture** with MVVM on both platforms:
+SteeringPhone uses **Clean Architecture** with MVVM on both platforms:
 
 ```
 Phone (Android)                   PC (Windows)
@@ -105,7 +105,7 @@ Full details → [Architecture.md](docs/Architecture.md)
 
 ## Protocol
 
-DriveLink uses a **custom 43-byte binary protocol** over UDP or WebSocket:
+SteeringPhone uses a **custom 43-byte binary protocol** over UDP or WebSocket:
 
 ```
 Magic(1) | Version(1) | Seq(2) | Timestamp(8) | Steering(4) |
@@ -130,7 +130,7 @@ cd apps/android
 **Windows:**
 ```powershell
 cd apps/windows
-dotnet build DriveLink.Desktop.sln
+dotnet build SteeringPhone.Desktop.sln
 ```
 
 ---

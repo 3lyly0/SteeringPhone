@@ -1,0 +1,52 @@
+# ──────────────────────────────────────
+# Android
+# ──────────────────────────────────────
+*.iml
+.gradle/
+local.properties
+.idea/
+.DS_Store
+apps/android/build/
+apps/android/app/build/
+apps/android/captures/
+apps/android/.externalNativeBuild/
+apps/android/.cxx/
+apps/android/*.keystore
+apps/android/*.jks
+
+# ──────────────────────────────────────
+# Windows / .NET
+# ──────────────────────────────────────
+apps/windows/bin/
+apps/windows/obj/
+apps/windows/**/*.user
+apps/windows/**/*.suo
+apps/windows/.vs/
+apps/windows/**/TestResults/
+apps/windows/**/*.nupkg
+apps/windows/**/*.snupkg
+
+# ──────────────────────────────────────
+# OS
+# ──────────────────────────────────────
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+*.lnk
+
+# ──────────────────────────────────────
+# Editor
+# ──────────────────────────────────────
+.vscode/
+*.swp
+*.swo
+*~
+
+# ──────────────────────────────────────
+# Logs & temp
+# ──────────────────────────────────────
+*.log
+logs/
+tmp/
+temp/
