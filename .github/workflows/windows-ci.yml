@@ -41,13 +41,13 @@ jobs:
         run: dotnet format --verify-no-changes --verbosity diagnostic
         working-directory: apps/windows
 
-      - name: Publish Windows App
-        run: dotnet publish SteeringPhone.Desktop/SteeringPhone.Desktop.csproj --configuration Release -r win-x64 --no-build --output publish/
+      - name: Publish Windows App (Self-Contained Standalone)
+        run: dotnet publish SteeringPhone.Desktop/SteeringPhone.Desktop.csproj --configuration Release -r win-x64 --self-contained true --output publish/
         working-directory: apps/windows
 
       - name: Upload Windows Desktop Executable Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: SteeringPhone-Windows-x64
+          name: SteeringPhone-Windows-x64-Standalone
           path: apps/windows/publish/
           retention-days: 7
