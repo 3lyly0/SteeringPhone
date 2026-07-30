@@ -1,5 +1,5 @@
 using System.Buffers.Binary;
-using SteeringPhone.Desktop.Core.Protocol;
+using SteeringPhone.Core.Protocol;
 using Xunit;
 
 namespace SteeringPhone.Tests;

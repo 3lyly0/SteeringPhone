@@ -1,6 +1,6 @@
 using System.Runtime.InteropServices;
 
-namespace SteeringPhone.Desktop.Core.Protocol;
+namespace SteeringPhone.Core.Protocol;
 
 [StructLayout(LayoutKind.Sequential, Pack = 1)]
 public readonly struct DrivePacket

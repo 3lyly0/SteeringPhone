@@ -1,4 +1,4 @@
-namespace SteeringPhone.Desktop.Core.Protocol;
+namespace SteeringPhone.Core.Protocol;
 
 public static class PacketConstants
 {

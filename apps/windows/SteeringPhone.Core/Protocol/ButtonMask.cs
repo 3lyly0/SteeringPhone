@@ -1,4 +1,4 @@
-namespace SteeringPhone.Desktop.Core.Protocol;
+namespace SteeringPhone.Core.Protocol;
 
 [Flags]
 public enum ButtonMask : ushort

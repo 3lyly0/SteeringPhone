@@ -1,15 +1,10 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>net9.0-windows10.0.19041.0</TargetFramework>
-    <TargetPlatformMinVersion>10.0.17763.0</TargetPlatformMinVersion>
+    <TargetFramework>net9.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <IsPackable>false</IsPackable>
     <IsTestProject>true</IsTestProject>
-    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
-    <Platforms>x64</Platforms>
-    <RuntimeIdentifiers>win-x64</RuntimeIdentifiers>
-    <UseRidGraph>true</UseRidGraph>
   </PropertyGroup>
 
   <ItemGroup>
@@ -26,6 +21,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\SteeringPhone.Desktop\SteeringPhone.Desktop.csproj" />
+    <ProjectReference Include="..\SteeringPhone.Core\SteeringPhone.Core.csproj" />
   </ItemGroup>
 </Project>
