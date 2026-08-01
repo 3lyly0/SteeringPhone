@@ -12,7 +12,7 @@ public class ViGEmControllerService
 {
     private ViGEmClient? _client;
     private IXbox360Controller? _controller;
-    
+
     public bool IsConnected { get; private set; }
     public string? ErrorMessage { get; private set; }
 

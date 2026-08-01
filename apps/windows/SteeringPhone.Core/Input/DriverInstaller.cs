@@ -1,15 +1,17 @@
 using Microsoft.Win32;
 using System.Diagnostics;
 using System.Net.Http;
+using System.Runtime.Versioning;
 
 namespace SteeringPhone.Core.Input;
 
 /// <summary>
 /// Detects ViGEmBus kernel driver presence and performs silent auto-installation if missing.
 /// </summary>
+[SupportedOSPlatform("windows")]
 public static class DriverInstaller
 {
-    public const string VIGEMBUS_DOWNLOAD_URL = "https://github.com/ViGEm/ViGEmBus/releases/download/v1.21.442.0/ViGEmBus_Setup_1.21.442.0.exe";
+    public const string VIGEMBUS_DOWNLOAD_URL = "https://github.com/nefarius/ViGEmBus/releases/download/v1.22.0/ViGEmBus_1.22.0_x64_x86_arm64.exe";
 
     /// <summary>
     /// Checks if the ViGEmBus Windows service is registered in System Registry.
@@ -39,7 +41,7 @@ public static class DriverInstaller
         {
             using var client = new HttpClient();
             client.DefaultRequestHeaders.Add("User-Agent", "SteeringPhone-DriverInstaller");
-            
+
             var bytes = await client.GetByteArrayAsync(VIGEMBUS_DOWNLOAD_URL);
             await File.WriteAllBytesAsync(tempInstallerPath, bytes);
 
@@ -53,7 +55,7 @@ public static class DriverInstaller
                 FileName = tempInstallerPath,
                 Arguments = "/q /norestart",
                 UseShellExecute = true,
-                Verb = "runas", // Request Administrator privileges if required
+                Verb = "runas",
                 CreateNoWindow = true
             };
 
@@ -72,7 +74,13 @@ public static class DriverInstaller
         {
             if (File.Exists(tempInstallerPath))
             {
-                try { File.Delete(tempInstallerPath); } catch { }
+                try
+                {
+                    File.Delete(tempInstallerPath);
+                }
+                catch
+                {
+                }
             }
         }
 
