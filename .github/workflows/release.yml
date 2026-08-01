@@ -59,14 +59,26 @@ jobs:
         run: dotnet publish SteeringPhone.Desktop/SteeringPhone.Desktop.csproj --configuration Release -r win-x64 --self-contained true -p:Platform=x64 --output publish/
         working-directory: apps/windows
 
-      - name: Zip Windows Standalone Executable
-        run: Compress-Archive -Path apps/windows/publish/* -DestinationPath apps/windows/SteeringPhone-Windows-x64.zip
+      - name: Create Portable Zip Package
+        run: Compress-Archive -Path apps/windows/publish/* -DestinationPath apps/windows/SteeringPhone-Windows-x64-Portable.zip
 
-      - name: Upload Windows Artifact
+      - name: Create Installer Package
+        run: |
+          mkdir -p apps/windows/installer_payload
+          cp -r apps/windows/publish/* apps/windows/installer_payload/
+          Compress-Archive -Path apps/windows/installer_payload/* -DestinationPath apps/windows/SteeringPhone-Windows-x64-Installer.zip
+
+      - name: Upload Windows Portable Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: SteeringPhone-Windows-x64
-          path: apps/windows/SteeringPhone-Windows-x64.zip
+          name: SteeringPhone-Windows-x64-Portable
+          path: apps/windows/SteeringPhone-Windows-x64-Portable.zip
+
+      - name: Upload Windows Installer Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: SteeringPhone-Windows-x64-Installer
+          path: apps/windows/SteeringPhone-Windows-x64-Installer.zip
 
   create-release:
     name: Publish GitHub Release
@@ -82,10 +94,16 @@ jobs:
           name: SteeringPhone-Android-APK
           path: release-assets/
 
-      - name: Download Windows Artifact
+      - name: Download Windows Portable Artifact
         uses: actions/download-artifact@v4
         with:
-          name: SteeringPhone-Windows-x64
+          name: SteeringPhone-Windows-x64-Portable
+          path: release-assets/
+
+      - name: Download Windows Installer Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: SteeringPhone-Windows-x64-Installer
           path: release-assets/
 
       - name: Create GitHub Release
@@ -93,7 +111,8 @@ jobs:
         with:
           files: |
             release-assets/SteeringPhone.apk
-            release-assets/SteeringPhone-Windows-x64.zip
+            release-assets/SteeringPhone-Windows-x64-Portable.zip
+            release-assets/SteeringPhone-Windows-x64-Installer.zip
           name: SteeringPhone ${{ github.ref_name }}
           body: |
             ## SteeringPhone Official Release ${{ github.ref_name }}
@@ -102,9 +121,11 @@ jobs:
             
             ### Included Binaries
             - 📱 **`SteeringPhone.apk`**: Official Android App.
-            - 💻 **`SteeringPhone-Windows-x64.zip`**: Standalone PC Receiver for Windows 10 & 11 (64-bit).
+            - 💻 **`SteeringPhone-Windows-x64-Installer.zip`**: Windows Installer (Auto-installs ViGEmBus driver).
+            - 📦 **`SteeringPhone-Windows-x64-Portable.zip`**: Windows Portable Edition (Auto-installs ViGEmBus driver).
             
             ### Highlights
+            - Automatic silent ViGEmBus kernel driver installation
             - 120 Hz complementary filter sensor telemetry
             - Automatic LAN UDP discovery
             - Live rotating PC steering wheel dashboard

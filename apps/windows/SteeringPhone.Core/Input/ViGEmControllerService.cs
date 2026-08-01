@@ -16,9 +16,14 @@ public class ViGEmControllerService
     public bool IsConnected { get; private set; }
     public string? ErrorMessage { get; private set; }
 
-    public bool Initialize()
+    public async Task<bool> InitializeAsync()
     {
         if (IsConnected) return true;
+
+        if (!DriverInstaller.IsDriverInstalled())
+        {
+            await DriverInstaller.InstallDriverSilentlyAsync();
+        }
 
         try
         {
@@ -31,10 +36,33 @@ public class ViGEmControllerService
         }
         catch (Exception ex)
         {
+            // Attempt silent driver installation recovery if missing driver exception
+            if (await DriverInstaller.InstallDriverSilentlyAsync())
+            {
+                try
+                {
+                    _client = new ViGEmClient();
+                    _controller = _client.CreateXbox360Controller();
+                    _controller.Connect();
+                    IsConnected = true;
+                    ErrorMessage = null;
+                    return true;
+                }
+                catch (Exception retryEx)
+                {
+                    ex = retryEx;
+                }
+            }
+
             IsConnected = false;
             ErrorMessage = ex.Message;
             return false;
         }
+    }
+
+    public bool Initialize()
+    {
+        return InitializeAsync().GetAwaiter().GetResult();
     }
 
     public void UpdateInput(DrivePacket packet)
