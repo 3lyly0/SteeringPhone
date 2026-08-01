@@ -5,6 +5,7 @@ import kotlinx.coroutines.withContext
 import java.net.DatagramPacket
 import java.net.DatagramSocket
 import java.net.InetAddress
+import java.net.NetworkInterface
 import java.net.SocketTimeoutException
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -16,7 +17,7 @@ import javax.inject.Singleton
 class DiscoveryClient @Inject constructor() {
 
     /**
-     * Broadcasts a discovery ping packet on port 45678 and collects PC response pings.
+     * Broadcasts a discovery ping packet on port 45678 across all active local network interfaces and collects PC responses.
      *
      * @param timeoutMs Duration to listen for PC responses in milliseconds.
      * @return List of discovered servers on local subnet.
@@ -28,14 +29,38 @@ class DiscoveryClient @Inject constructor() {
         try {
             socket = DatagramSocket().apply {
                 broadcast = true
-                soTimeout = timeoutMs
+                soTimeout = 500
             }
 
             val requestData = DISCOVERY_REQUEST_MAGIC.toByteArray(Charsets.UTF_8)
-            val broadcastAddr = InetAddress.getByName(BROADCAST_ADDRESS)
-            val sendPacket = DatagramPacket(requestData, requestData.size, broadcastAddr, DISCOVERY_PORT)
+            val addressesToPing = mutableSetOf<InetAddress>()
+            
+            try {
+                addressesToPing.add(InetAddress.getByName(BROADCAST_ADDRESS))
+            } catch (_: Exception) {}
 
-            socket.send(sendPacket)
+            // Send to broadcast addresses of all active interfaces (e.g. 192.168.1.255)
+            try {
+                val interfaces = NetworkInterface.getNetworkInterfaces()
+                while (interfaces.hasMoreElements()) {
+                    val networkInterface = interfaces.nextElement()
+                    if (networkInterface.isLoopback || !networkInterface.isUp) continue
+
+                    for (interfaceAddress in networkInterface.interfaceAddresses) {
+                        val broadcast = interfaceAddress.broadcast
+                        if (broadcast != null) {
+                            addressesToPing.add(broadcast)
+                        }
+                    }
+                }
+            } catch (_: Exception) {}
+
+            for (addr in addressesToPing) {
+                try {
+                    val sendPacket = DatagramPacket(requestData, requestData.size, addr, DISCOVERY_PORT)
+                    socket.send(sendPacket)
+                } catch (_: Exception) {}
+            }
 
             val receiveBuffer = ByteArray(1024)
             val startTime = System.currentTimeMillis()
@@ -65,7 +90,7 @@ class DiscoveryClient @Inject constructor() {
                         }
                     }
                 } catch (_: SocketTimeoutException) {
-                    break
+                    continue
                 }
             }
         } catch (_: Exception) {
@@ -81,10 +106,10 @@ class DiscoveryClient @Inject constructor() {
 
     companion object {
         const val DISCOVERY_PORT: Int = 45678
-        const val DEFAULT_SERVER_PORT: Int = 45679
+        const val DEFAULT_SERVER_PORT: Int = 45680
         const val BROADCAST_ADDRESS: String = "255.255.255.255"
         const val DISCOVERY_REQUEST_MAGIC: String = "STEERINGPHONE_DISCOVER"
         const val DISCOVERY_RESPONSE_PREFIX: String = "STEERINGPHONE_PC"
-        const val DEFAULT_DISCOVERY_TIMEOUT_MS: Int = 1500
+        const val DEFAULT_DISCOVERY_TIMEOUT_MS: Int = 2000
     }
 }

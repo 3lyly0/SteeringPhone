@@ -127,7 +127,10 @@ fun ConnectionScreen(
             onValueChange = { manualIp = it },
             label = { Text("PC IP Address") },
             modifier = Modifier.fillMaxWidth(),
-            singleLine = true
+            singleLine = true,
+            keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(
+                keyboardType = androidx.compose.ui.text.input.KeyboardType.Uri
+            )
         )
 
         Spacer(modifier = Modifier.height(8.dp))
