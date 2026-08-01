@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Build
+import android.provider.Settings
 import androidx.core.content.FileProvider
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
@@ -31,10 +32,19 @@ class UpdateManager @Inject constructor(
     @ApplicationContext private val context: Context
 ) {
 
+    fun getActiveVersion(): String {
+        return try {
+            val pInfo = context.packageManager.getPackageInfo(context.packageName, 0)
+            pInfo.versionName ?: CURRENT_VERSION
+        } catch (_: Exception) {
+            CURRENT_VERSION
+        }
+    }
+
     /**
      * Checks GitHub API (https://api.github.com/repos/3lyly0/SteeringPhone/releases/latest) for newer version tags.
      */
-    suspend fun checkForUpdate(currentVersion: String = CURRENT_VERSION): AppUpdateInfo = withContext(Dispatchers.IO) {
+    suspend fun checkForUpdate(currentVersion: String = getActiveVersion()): AppUpdateInfo = withContext(Dispatchers.IO) {
         try {
             val url = URL(GITHUB_RELEASES_API_URL)
             val connection = (url.openConnection() as HttpURLConnection).apply {
@@ -130,7 +140,20 @@ class UpdateManager @Inject constructor(
         }
     }
 
-    private fun installApk(apkFile: File) {
+    fun installApk(apkFile: File = File(context.cacheDir, "steeringphone-update.apk")) {
+        if (!apkFile.exists()) return
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && !context.packageManager.canRequestPackageInstalls()) {
+            val permissionIntent = Intent(
+                Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES,
+                Uri.parse("package:${context.packageName}")
+            ).apply {
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            }
+            context.startActivity(permissionIntent)
+            return
+        }
+
         val authority = "${context.packageName}.fileprovider"
         val apkUri: Uri = FileProvider.getUriForFile(context, authority, apkFile)
 

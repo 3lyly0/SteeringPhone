@@ -192,6 +192,15 @@ class MainActivity : ComponentActivity() {
         }
     }
 
+    override fun onResume() {
+        super.onResume()
+        // Resume pending APK install if permission was just granted by user
+        val downloadedApk = java.io.File(cacheDir, "steeringphone-update.apk")
+        if (downloadedApk.exists() && downloadedApk.length() > 1000) {
+            updateManager.installApk(downloadedApk)
+        }
+    }
+
     override fun onDestroy() {
         super.onDestroy()
         sensorManagerWrapper.stop()

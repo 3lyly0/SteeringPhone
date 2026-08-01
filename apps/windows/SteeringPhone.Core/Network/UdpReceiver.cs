@@ -16,12 +16,19 @@ public class UdpReceiver
 
     public void Start(int port = PacketConstants.UdpDataPort)
     {
-        if (IsListening) return;
+        try
+        {
+            _udpClient = new UdpClient();
+            _udpClient.Client.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true);
+            _udpClient.Client.Bind(new IPEndPoint(IPAddress.Any, port));
+            _cts = new CancellationTokenSource();
 
-        _udpClient = new UdpClient(port);
-        _cts = new CancellationTokenSource();
-
-        Task.Run(() => ReceiveLoopAsync(_cts.Token));
+            Task.Run(() => ReceiveLoopAsync(_cts.Token));
+        }
+        catch
+        {
+            // Port might be temporarily busy
+        }
     }
 
     private async Task ReceiveLoopAsync(CancellationToken ct)

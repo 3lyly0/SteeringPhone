@@ -55,13 +55,29 @@ public class AutoUpdater
                 }
             }
 
-            bool isNewer = IsVersionNewer(CURRENT_VERSION, tagName);
+            var currentVersion = GetActiveVersion();
+            bool isNewer = IsVersionNewer(currentVersion, tagName);
             return new WindowsUpdateInfo(isNewer && downloadUrl != null, tagName, downloadUrl, body);
         }
         catch
         {
-            return new WindowsUpdateInfo(false, CURRENT_VERSION, null, null);
+            return new WindowsUpdateInfo(false, GetActiveVersion(), null, null);
         }
+    }
+
+    public static string GetActiveVersion()
+    {
+        try
+        {
+            var mainModule = Process.GetCurrentProcess().MainModule;
+            if (mainModule?.FileName != null)
+            {
+                var fvi = FileVersionInfo.GetVersionInfo(mainModule.FileName);
+                if (!string.IsNullOrEmpty(fvi.FileVersion)) return fvi.FileVersion;
+            }
+        }
+        catch { }
+        return CURRENT_VERSION;
     }
 
     /// <summary>
@@ -115,11 +131,16 @@ public class AutoUpdater
                 File.Delete(backupExePath);
             }
 
-            // Launch background updater script to replace binary & restart app
+            // Launch background updater script with retry loop to replace binary & restart app
             var scriptPath = Path.Combine(Path.GetTempPath(), "update_steeringphone.bat");
             var batContent = $@"@echo off
 timeout /t 2 /nobreak > NUL
+:retry
 copy /y ""{tempUpdatePath}"" ""{currentExePath}""
+if errorlevel 1 (
+    timeout /t 1 /nobreak > NUL
+    goto retry
+)
 start """" ""{currentExePath}""
 del ""{tempUpdatePath}""
 del ""%~f0""
