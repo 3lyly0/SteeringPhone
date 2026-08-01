@@ -2,14 +2,17 @@ using Nefarius.ViGEm.Client;
 using Nefarius.ViGEm.Client.Targets;
 using Nefarius.ViGEm.Client.Targets.Xbox360;
 using SteeringPhone.Core.Protocol;
+using System.Runtime.Versioning;
 
 namespace SteeringPhone.Core.Input;
 
 /// <summary>
 /// Manages the virtual Xbox 360 controller target via Nefarius.ViGEm.Client kernel driver integration.
 /// </summary>
+[SupportedOSPlatform("windows")]
 public class ViGEmControllerService
 {
+    private readonly object _lock = new();
     private ViGEmClient? _client;
     private IXbox360Controller? _controller;
 
@@ -18,26 +21,38 @@ public class ViGEmControllerService
 
     public async Task<bool> InitializeAsync()
     {
-        if (IsConnected) return true;
+        lock (_lock)
+        {
+            if (IsConnected) return true;
+        }
 
         if (!DriverInstaller.IsDriverInstalled())
         {
             await DriverInstaller.InstallDriverSilentlyAsync();
         }
 
-        try
+        lock (_lock)
         {
-            _client = new ViGEmClient();
-            _controller = _client.CreateXbox360Controller();
-            _controller.Connect();
-            IsConnected = true;
-            ErrorMessage = null;
-            return true;
+            try
+            {
+                _client = new ViGEmClient();
+                _controller = _client.CreateXbox360Controller();
+                _controller.Connect();
+                IsConnected = true;
+                ErrorMessage = null;
+                return true;
+            }
+            catch (Exception ex)
+            {
+                IsConnected = false;
+                ErrorMessage = ex.Message;
+            }
         }
-        catch (Exception ex)
+
+        // Recovery attempt outside lock
+        if (await DriverInstaller.InstallDriverSilentlyAsync())
         {
-            // Attempt silent driver installation recovery if missing driver exception
-            if (await DriverInstaller.InstallDriverSilentlyAsync())
+            lock (_lock)
             {
                 try
                 {
@@ -50,14 +65,13 @@ public class ViGEmControllerService
                 }
                 catch (Exception retryEx)
                 {
-                    ex = retryEx;
+                    IsConnected = false;
+                    ErrorMessage = retryEx.Message;
                 }
             }
-
-            IsConnected = false;
-            ErrorMessage = ex.Message;
-            return false;
         }
+
+        return false;
     }
 
     public bool Initialize()
@@ -67,52 +81,60 @@ public class ViGEmControllerService
 
     public void UpdateInput(DrivePacket packet)
     {
-        if (!IsConnected || _controller == null) return;
-
-        try
+        lock (_lock)
         {
-            // Map Steering [-1.0, +1.0] -> Xbox LeftThumbX [-32768, +32767]
-            short thumbX = InputMapper.MapSteeringToThumbstickX(packet.SteeringAngle);
-            _controller.SetAxisValue(Xbox360Axis.LeftThumbX, thumbX);
+            if (!IsConnected || _controller == null) return;
 
-            // Map Triggers: Throttle -> RightTrigger, Brake -> LeftTrigger
-            byte rightTrigger = InputMapper.MapPedalToTrigger(packet.Throttle);
-            byte leftTrigger = InputMapper.MapPedalToTrigger(packet.Brake);
+            try
+            {
+                // Map Steering [-1.0, +1.0] -> Xbox LeftThumbX [-32768, +32767]
+                short thumbX = InputMapper.MapSteeringToThumbstickX(packet.SteeringAngle);
+                _controller.SetAxisValue(Xbox360Axis.LeftThumbX, thumbX);
 
-            _controller.SetSliderValue(Xbox360Slider.RightTrigger, rightTrigger);
-            _controller.SetSliderValue(Xbox360Slider.LeftTrigger, leftTrigger);
+                // Map Triggers: Throttle -> RightTrigger, Brake -> LeftTrigger
+                byte rightTrigger = InputMapper.MapPedalToTrigger(packet.Throttle);
+                byte leftTrigger = InputMapper.MapPedalToTrigger(packet.Brake);
 
-            // Map Buttons
-            var mask = packet.ButtonMask;
-            _controller.SetButtonState(Xbox360Button.A, mask.HasFlag(ButtonMask.HandBrake));
-            _controller.SetButtonState(Xbox360Button.B, mask.HasFlag(ButtonMask.Reverse));
-            _controller.SetButtonState(Xbox360Button.X, mask.HasFlag(ButtonMask.Nitro));
-            _controller.SetButtonState(Xbox360Button.Y, mask.HasFlag(ButtonMask.Horn));
-            _controller.SetButtonState(Xbox360Button.RightShoulder, mask.HasFlag(ButtonMask.GearUp));
-            _controller.SetButtonState(Xbox360Button.LeftShoulder, mask.HasFlag(ButtonMask.GearDown));
-            _controller.SetButtonState(Xbox360Button.Start, mask.HasFlag(ButtonMask.Pause));
-            _controller.SetButtonState(Xbox360Button.Back, mask.HasFlag(ButtonMask.Menu));
+                _controller.SetSliderValue(Xbox360Slider.RightTrigger, rightTrigger);
+                _controller.SetSliderValue(Xbox360Slider.LeftTrigger, leftTrigger);
 
-            _controller.SubmitReport();
-        }
-        catch
-        {
-            // Ignore report error
+                // Map Buttons
+                var mask = packet.ButtonMask;
+                _controller.SetButtonState(Xbox360Button.A, mask.HasFlag(ButtonMask.HandBrake));
+                _controller.SetButtonState(Xbox360Button.B, mask.HasFlag(ButtonMask.Reverse));
+                _controller.SetButtonState(Xbox360Button.X, mask.HasFlag(ButtonMask.Nitro));
+                _controller.SetButtonState(Xbox360Button.Y, mask.HasFlag(ButtonMask.Horn));
+                _controller.SetButtonState(Xbox360Button.RightShoulder, mask.HasFlag(ButtonMask.GearUp));
+                _controller.SetButtonState(Xbox360Button.LeftShoulder, mask.HasFlag(ButtonMask.GearDown));
+                _controller.SetButtonState(Xbox360Button.Start, mask.HasFlag(ButtonMask.Pause));
+                _controller.SetButtonState(Xbox360Button.Back, mask.HasFlag(ButtonMask.Menu));
+
+                _controller.SubmitReport();
+            }
+            catch
+            {
+                // Ignore report error
+            }
         }
     }
 
     public void Disconnect()
     {
-        try
+        lock (_lock)
         {
-            if (_controller != null)
+            try
             {
-                _controller.Disconnect();
-                _controller = null;
+                if (_controller != null)
+                {
+                    _controller.Disconnect();
+                    _controller = null;
+                }
             }
+            catch
+            {
+            }
+            _client = null;
+            IsConnected = false;
         }
-        catch { }
-        _client = null;
-        IsConnected = false;
     }
 }

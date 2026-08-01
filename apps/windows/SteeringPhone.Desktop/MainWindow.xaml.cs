@@ -116,9 +116,37 @@ namespace SteeringPhone.Desktop
 
         private void OnWindowClosed(object sender, WindowEventArgs args)
         {
-            _udpReceiver.Stop();
-            _discoveryService.Stop();
-            _viGEmService.Disconnect();
+            try
+            {
+                _udpReceiver.OnPacketReceived -= OnDrivePacketReceived;
+            }
+            catch
+            {
+            }
+
+            try
+            {
+                _udpReceiver.Stop();
+            }
+            catch
+            {
+            }
+
+            try
+            {
+                _discoveryService.Stop();
+            }
+            catch
+            {
+            }
+
+            try
+            {
+                _viGEmService.Disconnect();
+            }
+            catch
+            {
+            }
         }
     }
 }
