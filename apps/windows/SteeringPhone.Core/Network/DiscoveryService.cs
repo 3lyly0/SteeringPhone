@@ -1,6 +1,7 @@
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
+using SteeringPhone.Core.Protocol;
 
 namespace SteeringPhone.Core.Network;
 
