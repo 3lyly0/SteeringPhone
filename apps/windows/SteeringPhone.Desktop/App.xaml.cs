@@ -10,8 +10,15 @@ namespace SteeringPhone.Desktop
         public App()
         {
             this.InitializeComponent();
+            this.UnhandledException += (sender, e) =>
+            {
+                Log.Error(e.Exception, "Unhandled application exception: {Message}", e.Message);
+                e.Handled = true;
+            };
+
             Log.Logger = new LoggerConfiguration()
                 .WriteTo.Console()
+                .WriteTo.File("steeringphone_desktop.log", rollingInterval: RollingInterval.Day)
                 .CreateLogger();
 
             Log.Information("SteeringPhone Desktop Initializing...");
