@@ -44,7 +44,7 @@ public class DiscoveryService
                 if (message.Trim() == "STEERINGPHONE_DISCOVER")
                 {
                     var hostname = Dns.GetHostName();
-                    var responseText = $"STEERINGPHONE_PC:{hostname}:45679:UDP";
+                    var responseText = $"STEERINGPHONE_PC:{hostname}:{PacketConstants.UdpDataPort}:UDP";
                     var responseBytes = Encoding.UTF8.GetBytes(responseText);
 
                     await _listener.SendAsync(responseBytes, responseBytes.Length, result.RemoteEndPoint);

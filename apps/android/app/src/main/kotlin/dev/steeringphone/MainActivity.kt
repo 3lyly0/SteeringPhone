@@ -39,7 +39,7 @@ class MainActivity : ComponentActivity() {
 
         // Continuous packet streaming coroutine loop
         lifecycleScope.launch {
-            sensorManagerWrapper.sensorDataFlow.collectLatest { sensorData ->
+            sensorManagerWrapper.sensorDataFlow.collect { sensorData ->
                 if (connectionManager.connectionState.value is ConnectionState.Connected) {
                     sequenceNumber++
                     val packet = DrivePacket(
