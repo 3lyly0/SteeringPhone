@@ -130,10 +130,12 @@
 
                 <!-- Controller Status Card -->
                 <Border Background="#181B22" CornerRadius="12" Padding="16">
-                    <StackPanel Spacing="4">
+                    <StackPanel Spacing="8">
                         <TextBlock Text="VIRTUAL CONTROLLER" Foreground="Gray" FontWeight="Bold" FontSize="11" />
                         <TextBlock Text="Xbox 360 Controller (XInput)" Foreground="White" FontWeight="SemiBold" FontSize="13" />
-                        <TextBlock Text="Status: Active &amp; Ready" Foreground="#00E676" FontSize="11" />
+                        <TextBlock x:Name="DriverStatusText" Text="Status: Checking Driver..." Foreground="#00E5FF" FontSize="11" />
+                        <ProgressBar x:Name="DriverProgressBar" IsIndeterminate="True" Visibility="Collapsed" Height="4" Foreground="#00E5FF" />
+                        <Button x:Name="DriverInstallBtn" Content="Install ViGEmBus Driver" Click="OnInstallDriverClick" Visibility="Collapsed" Background="#E53935" Foreground="White" FontSize="11" FontWeight="Bold" CornerRadius="8" HorizontalAlignment="Left" Padding="8,4" />
                     </StackPanel>
                 </Border>
             </StackPanel>

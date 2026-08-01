@@ -27,19 +27,104 @@ namespace SteeringPhone.Desktop
             _autoUpdater = new AutoUpdater();
             _viGEmService = new ViGEmControllerService();
 
-            // Initialize kernel virtual Xbox 360 controller
-            bool vigemOk = _viGEmService.Initialize();
-
             _udpReceiver.OnPacketReceived += OnDrivePacketReceived;
 
-            // Start UDP telemetry receiver and LAN auto-discovery service
+            // Start UDP telemetry receiver and LAN auto-discovery service immediately
             _udpReceiver.Start(PacketConstants.UdpDataPort);
             _discoveryService.Start();
+
+            // Non-blocking asynchronous driver initialization & UI status check
+            InitializeViGEmDriverAsync();
 
             // Asynchronously check for GitHub updates
             CheckForGitHubUpdatesAsync();
 
             this.Closed += OnWindowClosed;
+        }
+
+        private async void InitializeViGEmDriverAsync()
+        {
+            UpdateDriverStatusUI("Checking ViGEmBus Driver...", isLoading: true);
+
+            bool isInstalled = DriverInstaller.IsDriverInstalled();
+            if (isInstalled)
+            {
+                bool connected = await _viGEmService.InitializeAsync();
+                if (connected)
+                {
+                    UpdateDriverStatusUI("Status: Driver Active & Xbox 360 Controller Ready", isOk: true);
+                }
+                else
+                {
+                    UpdateDriverStatusUI($"Status: Driver Error ({_viGEmService.ErrorMessage})", isError: true, showInstallBtn: true);
+                }
+            }
+            else
+            {
+                UpdateDriverStatusUI("Status: Driver Missing — Installation Required", isWarning: true, showInstallBtn: true);
+                // Attempt automatic silent installation in background
+                InstallDriverInBackgroundAsync();
+            }
+        }
+
+        private async void OnInstallDriverClick(object sender, RoutedEventArgs e)
+        {
+            await InstallDriverInBackgroundAsync();
+        }
+
+        private async Task InstallDriverInBackgroundAsync()
+        {
+            DispatcherQueue.TryEnqueue(() =>
+            {
+                UpdateDriverStatusUI("Installing ViGEmBus Driver (Please approve UAC if prompted)...", isLoading: true);
+            });
+
+            bool success = await DriverInstaller.InstallDriverSilentlyAsync();
+            if (success)
+            {
+                bool connected = await _viGEmService.InitializeAsync();
+                DispatcherQueue.TryEnqueue(() =>
+                {
+                    if (connected)
+                    {
+                        UpdateDriverStatusUI("Status: Driver Installed & Controller Ready!", isOk: true);
+                    }
+                    else
+                    {
+                        UpdateDriverStatusUI("Status: Driver installed, initializing controller...", isOk: true);
+                    }
+                });
+            }
+            else
+            {
+                DispatcherQueue.TryEnqueue(() =>
+                {
+                    UpdateDriverStatusUI("Status: Driver Installation Failed (Click to Retry)", isError: true, showInstallBtn: true);
+                });
+            }
+        }
+
+        private void UpdateDriverStatusUI(string message, bool isLoading = false, bool isOk = false, bool isWarning = false, bool isError = false, bool showInstallBtn = false)
+        {
+            DispatcherQueue.TryEnqueue(() =>
+            {
+                DriverStatusText.Text = message;
+                DriverProgressBar.Visibility = isLoading ? Visibility.Visible : Visibility.Collapsed;
+                DriverInstallBtn.Visibility = showInstallBtn ? Visibility.Visible : Visibility.Collapsed;
+
+                if (isOk)
+                {
+                    DriverStatusText.Foreground = new Microsoft.UI.Xaml.Media.SolidColorBrush(Windows.UI.Color.FromArgb(255, 0, 230, 118));
+                }
+                else if (isWarning)
+                {
+                    DriverStatusText.Foreground = new Microsoft.UI.Xaml.Media.SolidColorBrush(Windows.UI.Color.FromArgb(255, 0, 229, 255));
+                }
+                else if (isError)
+                {
+                    DriverStatusText.Foreground = new Microsoft.UI.Xaml.Media.SolidColorBrush(Windows.UI.Color.FromArgb(255, 229, 57, 53));
+                }
+            });
         }
 
         private async void CheckForGitHubUpdatesAsync()
@@ -90,11 +175,9 @@ namespace SteeringPhone.Desktop
             // Dispatch UI updates to WinUI 3 UI Thread
             DispatcherQueue.TryEnqueue(DispatcherQueuePriority.High, () =>
             {
-                // Update Steering Wheel Visual Angle (e.g. angle in degrees = SteeringAngle * 90)
                 double rotationDegrees = packet.SteeringAngle * 90.0;
                 WheelTransform.Angle = rotationDegrees;
 
-                // Update Telemetry Controls
                 AngleText.Text = $"{rotationDegrees:F1}°";
                 OutputText.Text = $"Steering Output: {packet.SteeringAngle:F2}";
 
@@ -108,7 +191,6 @@ namespace SteeringPhone.Desktop
                 BatteryText.Text = $"{packet.BatteryPercentage}%";
                 PingText.Text = $"{packet.PingMs} ms";
 
-                // Update Connection Status Badge
                 StatusText.Text = "Connected to Phone";
                 StatusBadgeBorder.Background = new Microsoft.UI.Xaml.Media.SolidColorBrush(Windows.UI.Color.FromArgb(255, 24, 27, 34));
             });
