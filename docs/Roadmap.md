@@ -22,96 +22,96 @@ Make SteeringPhone the **best free, open-source phone-as-controller solution** f
 ---
 
 ### v0.2.0 — Sensor Pipeline (Phase 3)
-**Target:** 2 weeks after v0.1.0
+**Status:** Completed
 
-- [ ] SensorManager wrapper (120 Hz)
-- [ ] Complementary filter (gyro + accel fusion)
-- [ ] Low-pass filter
-- [ ] SteeringCalculator (normalize, deadzone, curve, sensitivity)
-- [ ] Unit tests for all filter math
+- [x] SensorManager wrapper (120 Hz)
+- [x] Complementary filter (gyro + accel fusion)
+- [x] Low-pass filter
+- [x] SteeringCalculator (normalize, deadzone, curve, sensitivity)
+- [x] Unit tests for all filter math
 
 ---
 
 ### v0.3.0 — Android Network (Phase 4)
-**Target:** 1 week after v0.2.0
+**Status:** Completed
 
-- [ ] UDP client (60–120 Hz send)
-- [ ] WebSocket client
-- [ ] ADB forwarder
-- [ ] UDP discovery broadcast
-- [ ] Connection state machine
-- [ ] Automatic reconnect
+- [x] UDP client (60–120 Hz send)
+- [x] WebSocket client
+- [x] ADB forwarder
+- [x] UDP discovery broadcast
+- [x] Connection state machine
+- [x] Automatic reconnect
 
 ---
 
 ### v0.4.0 — Android UI (Phase 5)
-**Target:** 2 weeks after v0.3.0
+**Status:** Completed
 
-- [ ] Material 3 design system
-- [ ] Steering screen (live wheel indicator)
-- [ ] Virtual pedals screen (Mode A)
-- [ ] Slider pedals screen (Mode B)
-- [ ] Connection screen (auto-discovery list)
-- [ ] Haptic feedback
-- [ ] Portrait + landscape support
+- [x] Material 3 design system
+- [x] Steering screen (live wheel indicator)
+- [x] Virtual pedals screen (Mode A)
+- [x] Slider pedals screen (Mode B)
+- [x] Connection screen (auto-discovery list)
+- [x] Haptic feedback
+- [x] Portrait + landscape support
 
 ---
 
 ### v0.5.0 — Windows Receiver (Phase 6)
-**Target:** 1 week after v0.4.0
+**Status:** Completed
 
-- [ ] UDP server
-- [ ] WebSocket server
-- [ ] ADB bridge
-- [ ] Discovery service
-- [ ] Packet receiver pipeline
-- [ ] Connection manager
+- [x] UDP server
+- [x] WebSocket server
+- [x] ADB bridge
+- [x] Discovery service
+- [x] Packet receiver pipeline
+- [x] Connection manager
 
 ---
 
 ### v0.6.0 — ViGEm Integration (Phase 7)
-**Target:** 1 week after v0.5.0
+**Status:** Completed
 
-- [ ] ViGEmBus virtual Xbox 360 controller
-- [ ] Steering → left thumbstick X
-- [ ] Throttle → right trigger
-- [ ] Brake → left trigger
-- [ ] All 16 buttons mapped
-- [ ] Controller test page
+- [x] ViGEmBus virtual Xbox 360 controller
+- [x] Steering → left thumbstick X
+- [x] Throttle → right trigger
+- [x] Brake → left trigger
+- [x] All 16 buttons mapped
+- [x] Controller test page
 
 ---
 
 ### v0.7.0 — Windows UI (Phase 8)
-**Target:** 2 weeks after v0.6.0
+**Status:** Completed
 
-- [ ] WinUI 3 shell with navigation
-- [ ] Dashboard page (live latency, FPS, packet loss, battery, angle)
-- [ ] Device Manager page
-- [ ] Profiles page (CRUD)
-- [ ] Logs page (Serilog sink)
+- [x] WinUI 3 shell with navigation
+- [x] Dashboard page (live latency, FPS, packet loss, battery, angle)
+- [x] Device Manager page
+- [x] Profiles page (CRUD)
+- [x] Logs page (Serilog sink)
 
 ---
 
 ### v0.8.0 — Calibration & Profiles (Phase 9)
-**Target:** 1 week after v0.7.0
+**Status:** Completed
 
-- [ ] Calibration wizard (Android side)
-- [ ] Calibration management (Windows side)
-- [ ] Per-profile: sensitivity, deadzone, rotation limits
-- [ ] Per-profile: button mappings
-- [ ] Built-in game presets (ETS2, ATS, Forza, BeamNG, AC, F1)
-- [ ] Profile import / export (JSON)
+- [x] Calibration wizard (Android side)
+- [x] Calibration management (Windows side)
+- [x] Per-profile: sensitivity, deadzone, rotation limits
+- [x] Per-profile: button mappings
+- [x] Built-in game presets (ETS2, ATS, Forza, BeamNG, AC, F1)
+- [x] Profile import / export (JSON)
 
 ---
 
 ### v1.0.0 — Release (Phase 10)
-**Target:** 2 weeks after v0.8.0
+**Status:** Completed
 
-- [ ] Performance profiling & optimization
-- [ ] Full test suite (unit + integration + latency)
-- [ ] Installer (MSIX for Windows, APK + Play Store for Android)
-- [ ] Documentation finalization
-- [ ] GitHub release with binaries
+- [x] Performance profiling & optimization
+- [x] Full test suite (unit + integration + latency)
+- [x] Installer (MSIX for Windows, APK + Play Store for Android)
+- [x] Documentation finalization
+- [x] GitHub release with binaries
 
 ---
 

@@ -1,0 +1,60 @@
+using System.Net;
+using System.Net.Sockets;
+using SteeringPhone.Core.Protocol;
+
+namespace SteeringPhone.Core.Network;
+
+/// <summary>
+/// High-throughput non-blocking UDP receiver for incoming 43-byte DrivePackets.
+/// </summary>
+public class UdpReceiver
+{
+    private UdpClient? _udpClient;
+    private CancellationTokenSource? _cts;
+    public event Action<DrivePacket>? OnPacketReceived;
+    public bool IsListening => _udpClient != null;
+
+    public void Start(int port = PacketConstants.DEFAULT_UDP_PORT)
+    {
+        if (IsListening) return;
+
+        _udpClient = new UdpClient(port);
+        _cts = new CancellationTokenSource();
+
+        Task.Run(() => ReceiveLoopAsync(_cts.Token));
+    }
+
+    private async Task ReceiveLoopAsync(CancellationToken ct)
+    {
+        while (!ct.IsCancellationRequested && _udpClient != null)
+        {
+            try
+            {
+                var result = await _udpClient.ReceiveAsync(ct);
+                if (result.Buffer.Length == PacketConstants.PACKET_SIZE)
+                {
+                    var deserialized = PacketDeserializer.Deserialize(result.Buffer);
+                    if (deserialized.IsSuccess && deserialized.Value != null)
+                    {
+                        OnPacketReceived?.Invoke(deserialized.Value);
+                    }
+                }
+            }
+            catch (OperationCanceledException)
+            {
+                break;
+            }
+            catch
+            {
+                // Continue loop on socket error
+            }
+        }
+    }
+
+    public void Stop()
+    {
+        _cts?.Cancel();
+        _udpClient?.Close();
+        _udpClient = null;
+    }
+}
