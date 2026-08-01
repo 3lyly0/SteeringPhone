@@ -1,5 +1,6 @@
 using Microsoft.UI.Dispatching;
 using Microsoft.UI.Xaml;
+using SteeringPhone.Core.Input;
 using SteeringPhone.Core.Network;
 using SteeringPhone.Core.Protocol;
 using SteeringPhone.Core.Update;
@@ -12,6 +13,8 @@ namespace SteeringPhone.Desktop
         private readonly UdpReceiver _udpReceiver;
         private readonly DiscoveryService _discoveryService;
         private readonly AutoUpdater _autoUpdater;
+        private readonly ViGEmControllerService _viGEmService;
+
         private WindowsUpdateInfo? _currentUpdateInfo;
         private long _packetCount = 0;
 
@@ -22,6 +25,10 @@ namespace SteeringPhone.Desktop
             _udpReceiver = new UdpReceiver();
             _discoveryService = new DiscoveryService();
             _autoUpdater = new AutoUpdater();
+            _viGEmService = new ViGEmControllerService();
+
+            // Initialize kernel virtual Xbox 360 controller
+            bool vigemOk = _viGEmService.Initialize();
 
             _udpReceiver.OnPacketReceived += OnDrivePacketReceived;
 
@@ -77,6 +84,9 @@ namespace SteeringPhone.Desktop
         {
             _packetCount++;
 
+            // Inject input telemetry into kernel virtual Xbox 360 controller
+            _viGEmService.UpdateInput(packet);
+
             // Dispatch UI updates to WinUI 3 UI Thread
             DispatcherQueue.TryEnqueue(DispatcherQueuePriority.High, () =>
             {
@@ -108,6 +118,7 @@ namespace SteeringPhone.Desktop
         {
             _udpReceiver.Stop();
             _discoveryService.Stop();
+            _viGEmService.Disconnect();
         }
     }
 }
