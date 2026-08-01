@@ -31,12 +31,11 @@ public class UdpReceiver
             try
             {
                 var result = await _udpClient.ReceiveAsync(ct);
-                if (result.Buffer.Length == PacketConstants.PACKET_SIZE)
+                if (result.Buffer.Length == PacketConstants.PacketSize)
                 {
-                    var deserialized = PacketDeserializer.Deserialize(result.Buffer);
-                    if (deserialized.IsSuccess && deserialized.Value != null)
+                    if (PacketDeserializer.TryDeserialize(result.Buffer, out var packet, out _))
                     {
-                        OnPacketReceived?.Invoke(deserialized.Value);
+                        OnPacketReceived?.Invoke(packet);
                     }
                 }
             }
