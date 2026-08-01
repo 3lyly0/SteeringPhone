@@ -5,7 +5,9 @@ import io.ktor.client.engine.cio.CIO
 import io.ktor.client.plugins.websocket.DefaultClientWebSocketSession
 import io.ktor.client.plugins.websocket.WebSockets
 import io.ktor.client.plugins.websocket.webSocketSession
+import io.ktor.websocket.CloseReason
 import io.ktor.websocket.Frame
+import io.ktor.websocket.close
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -59,7 +61,7 @@ class WebSocketClient @Inject constructor() {
      */
     suspend fun close() = withContext(Dispatchers.IO) {
         try {
-            session?.close()
+            session?.close(CloseReason(CloseReason.Codes.NORMAL, "Client disconnect"))
         } catch (_: Exception) {}
         try {
             httpClient?.close()
