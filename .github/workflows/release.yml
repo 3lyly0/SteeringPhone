@@ -1,0 +1,113 @@
+name: Release Build & Publish
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-android:
+    name: Build Android APK
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v3
+        with:
+          gradle-version: '8.4'
+
+      - name: Build APK
+        run: gradle assembleDebug --no-daemon
+        working-directory: apps/android
+
+      - name: Prepare APK Asset
+        run: |
+          mkdir -p artifacts
+          cp apps/android/app/build/outputs/apk/debug/*.apk artifacts/SteeringPhone.apk
+
+      - name: Upload Android Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: SteeringPhone-Android-APK
+          path: artifacts/SteeringPhone.apk
+
+  build-windows:
+    name: Build Windows Standalone
+    runs-on: windows-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup .NET 9
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '9.0.x'
+
+      - name: Restore & Publish Windows Standalone Executable
+        run: dotnet publish SteeringPhone.Desktop/SteeringPhone.Desktop.csproj --configuration Release -r win-x64 --self-contained true -p:Platform=x64 --output publish/
+        working-directory: apps/windows
+
+      - name: Zip Windows Standalone Executable
+        run: Compress-Archive -Path apps/windows/publish/* -DestinationPath apps/windows/SteeringPhone-Windows-x64.zip
+
+      - name: Upload Windows Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: SteeringPhone-Windows-x64
+          path: apps/windows/SteeringPhone-Windows-x64.zip
+
+  create-release:
+    name: Publish GitHub Release
+    needs: [build-android, build-windows]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Download Android Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: SteeringPhone-Android-APK
+          path: release-assets/
+
+      - name: Download Windows Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: SteeringPhone-Windows-x64
+          path: release-assets/
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            release-assets/SteeringPhone.apk
+            release-assets/SteeringPhone-Windows-x64.zip
+          name: SteeringPhone ${{ github.ref_name }}
+          body: |
+            ## SteeringPhone Official Release ${{ github.ref_name }}
+            
+            Transform your Android phone into a high-precision steering wheel controller for PC games!
+            
+            ### Included Binaries
+            - 📱 **`SteeringPhone.apk`**: Official Android App.
+            - 💻 **`SteeringPhone-Windows-x64.zip`**: Standalone PC Receiver for Windows 10 & 11 (64-bit).
+            
+            ### Highlights
+            - 120 Hz complementary filter sensor telemetry
+            - Automatic LAN UDP discovery
+            - Live rotating PC steering wheel dashboard
+            - Built-in GitHub Releases auto-updater
+          draft: false
+          prerelease: false
