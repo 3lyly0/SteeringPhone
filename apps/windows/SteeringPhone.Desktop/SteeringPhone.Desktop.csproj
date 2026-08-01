@@ -17,6 +17,13 @@
     <Platforms>x64</Platforms>
     <RuntimeIdentifiers>win-x64</RuntimeIdentifiers>
     <UseRidGraph>true</UseRidGraph>
+    <AssemblyTitle>SteeringPhone Desktop</AssemblyTitle>
+    <Product>SteeringPhone</Product>
+    <Company>SteeringPhone Open Source Team</Company>
+    <Description>Transform your phone into a professional steering wheel controller for PC sim racing.</Description>
+    <Version>1.0.0</Version>
+    <FileVersion>1.0.0.0</FileVersion>
+    <Copyright>Copyright © 2026 3lyly0</Copyright>
   </PropertyGroup>
 
   <ItemGroup>

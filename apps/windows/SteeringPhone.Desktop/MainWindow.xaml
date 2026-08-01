@@ -21,12 +21,21 @@
                 <TextBlock Text="PC RECEIVER" FontSize="20" FontWeight="Light" Foreground="#00E5FF" />
             </StackPanel>
 
-            <Border x:Name="StatusBadgeBorder" HorizontalAlignment="Right" Background="#181B22" CornerRadius="16" Padding="12,6">
-                <StackPanel Orientation="Horizontal" Spacing="8">
-                    <Ellipse x:Name="StatusDot" Width="10" Height="10" Fill="#00E676" />
-                    <TextBlock x:Name="StatusText" Text="Listening for Phone..." Foreground="White" FontSize="12" FontWeight="SemiBold" />
-                </StackPanel>
-            </Border>
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="12" VerticalAlignment="Center">
+                <Border x:Name="UpdateBanner" Visibility="Collapsed" Background="#E53935" CornerRadius="16" Padding="12,6">
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <TextBlock x:Name="UpdateBannerText" Text="New Update v1.0.1 Available!" Foreground="White" FontSize="12" FontWeight="Bold" VerticalAlignment="Center" />
+                        <Button x:Name="UpdateButton" Content="Update Now" Click="OnUpdateClick" Background="#00E5FF" Foreground="Black" FontSize="11" FontWeight="Bold" CornerRadius="12" Padding="8,2" />
+                    </StackPanel>
+                </Border>
+
+                <Border x:Name="StatusBadgeBorder" Background="#181B22" CornerRadius="16" Padding="12,6">
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <Ellipse x:Name="StatusDot" Width="10" Height="10" Fill="#00E676" />
+                        <TextBlock x:Name="StatusText" Text="Listening for Phone..." Foreground="White" FontSize="12" FontWeight="SemiBold" />
+                    </StackPanel>
+                </Border>
+            </StackPanel>
         </Grid>
 
         <!-- Center Main Dashboard Area -->

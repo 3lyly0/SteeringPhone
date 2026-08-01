@@ -2,6 +2,7 @@ using Microsoft.UI.Dispatching;
 using Microsoft.UI.Xaml;
 using SteeringPhone.Core.Network;
 using SteeringPhone.Core.Protocol;
+using SteeringPhone.Core.Update;
 using System.Diagnostics;
 
 namespace SteeringPhone.Desktop
@@ -10,6 +11,8 @@ namespace SteeringPhone.Desktop
     {
         private readonly UdpReceiver _udpReceiver;
         private readonly DiscoveryService _discoveryService;
+        private readonly AutoUpdater _autoUpdater;
+        private WindowsUpdateInfo? _currentUpdateInfo;
         private long _packetCount = 0;
 
         public MainWindow()
@@ -18,6 +21,7 @@ namespace SteeringPhone.Desktop
 
             _udpReceiver = new UdpReceiver();
             _discoveryService = new DiscoveryService();
+            _autoUpdater = new AutoUpdater();
 
             _udpReceiver.OnPacketReceived += OnDrivePacketReceived;
 
@@ -25,7 +29,48 @@ namespace SteeringPhone.Desktop
             _udpReceiver.Start(PacketConstants.UdpDataPort);
             _discoveryService.Start();
 
+            // Asynchronously check for GitHub updates
+            CheckForGitHubUpdatesAsync();
+
             this.Closed += OnWindowClosed;
+        }
+
+        private async void CheckForGitHubUpdatesAsync()
+        {
+            _currentUpdateInfo = await _autoUpdater.CheckForUpdatesAsync();
+            if (_currentUpdateInfo != null && _currentUpdateInfo.IsUpdateAvailable)
+            {
+                DispatcherQueue.TryEnqueue(DispatcherQueuePriority.Normal, () =>
+                {
+                    UpdateBannerText.Text = $"New Update v{_currentUpdateInfo.LatestVersion} Available!";
+                    UpdateBanner.Visibility = Visibility.Visible;
+                });
+            }
+        }
+
+        private async void OnUpdateClick(object sender, RoutedEventArgs e)
+        {
+            if (_currentUpdateInfo?.DownloadUrl != null)
+            {
+                UpdateButton.IsEnabled = false;
+                UpdateButton.Content = "Downloading...";
+                bool success = await _autoUpdater.DownloadAndApplyUpdateAsync(_currentUpdateInfo.DownloadUrl, progress =>
+                {
+                    DispatcherQueue.TryEnqueue(() =>
+                    {
+                        UpdateButton.Content = $"{(progress * 100):F0}%";
+                    });
+                });
+
+                if (!success)
+                {
+                    DispatcherQueue.TryEnqueue(() =>
+                    {
+                        UpdateButton.IsEnabled = true;
+                        UpdateButton.Content = "Update Failed (Retry)";
+                    });
+                }
+            }
         }
 
         private void OnDrivePacketReceived(DrivePacket packet)
