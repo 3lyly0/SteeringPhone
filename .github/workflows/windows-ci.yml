@@ -30,11 +30,11 @@ jobs:
         working-directory: apps/windows
 
       - name: Build solution
-        run: dotnet build --configuration Release --no-restore
+        run: dotnet build --configuration Release -p:Platform=x64 --no-restore
         working-directory: apps/windows
 
       - name: Run unit tests
-        run: dotnet test --configuration Release --no-build --verbosity normal
+        run: dotnet test --configuration Release -p:Platform=x64 --no-build --verbosity normal
         working-directory: apps/windows
 
       - name: Check code formatting
