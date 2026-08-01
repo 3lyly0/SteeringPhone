@@ -102,13 +102,19 @@ public class AutoUpdater
             // Validate downloaded file
             if (!File.Exists(tempUpdatePath) || new FileInfo(tempUpdatePath).Length < 1000)
             {
-                if (File.Exists(tempUpdatePath)) File.Delete(tempUpdatePath);
+                if (File.Exists(tempUpdatePath))
+                {
+                    File.Delete(tempUpdatePath);
+                }
                 return false;
             }
 
             // Atomic Fallback: Create backup of current running binary
-            if (File.Exists(backupExePath)) File.Delete(backupExePath);
-            
+            if (File.Exists(backupExePath))
+            {
+                File.Delete(backupExePath);
+            }
+
             // Launch background updater script to replace binary & restart app
             var scriptPath = Path.Combine(Path.GetTempPath(), "update_steeringphone.bat");
             var batContent = $@"@echo off
@@ -134,7 +140,16 @@ del ""%~f0""
         catch
         {
             // Fallback recovery: cleanup temp files
-            if (File.Exists(tempUpdatePath)) try { File.Delete(tempUpdatePath); } catch { }
+            if (File.Exists(tempUpdatePath))
+            {
+                try
+                {
+                    File.Delete(tempUpdatePath);
+                }
+                catch
+                {
+                }
+            }
             return false;
         }
     }
